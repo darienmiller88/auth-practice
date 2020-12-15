@@ -1,22 +1,19 @@
-const db = require("../models");
-const User = db.users
+const { User } = require("../models");
 const router = require("express").Router()
 const bycrypt = require("bcrypt")
 const passport = require("../middlewares/authentication")
-const { signup } = require("../middlewares/viewsMiddlewares")
+const { signup, checkNotAuthenticated } = require("../middlewares/viewsMiddlewares")
 
-router.post("/login", passport.authenticate("local", {
-        successRedirect: "/videos",
-        failureRedirect: "/login",
-        failureFlash: true
-    }), 
-    (req, res) => {
-    console.log("login successful!")
-})
+router.post("/login", checkNotAuthenticated, passport.authenticate("local", {
+    successRedirect: "/dashboard",
+    failureRedirect: "/login",
+    failureFlash: true
+}))
 
 router.delete("/logout", (req, res) => {
-    req.logOut()
-    res.redirect('/login')
+    console.log("hello delete")
+    req.logout()
+    res.redirect("/login")
 })
 
 // Retrieve all Users from the database.
@@ -121,6 +118,6 @@ const createUser = async (req, res, next) => {
 }
 
 // Create and Save a new User
-router.post("/", createUser, signup)
+router.post("/", checkNotAuthenticated, createUser, signup)
 
 module.exports = router
